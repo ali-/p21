@@ -81,6 +81,7 @@ struct ContentView: View {
 	@State var deck = Card.deck()
 	@State var outcome = 0
 	@State var staying = false
+	@State var label = "Stay"
 	
 	func initialize() {
 		dealer.append(deck.popLast()!)
@@ -94,6 +95,7 @@ struct ContentView: View {
 		hand = []
 		deck = Card.deck()
 		staying = false
+		label = "Stay"
 		initialize()
 	}
 	
@@ -109,30 +111,52 @@ struct ContentView: View {
 	
 	var body: some View {
 		VStack {
-			if staying {
-				VStack {
-					Text("Dealer")
-					HStack {
+			VStack {
+				HStack {
+					if staying {
 						ForEach(dealer, id: \.id) { card in
 							VStack {
 								Text("\(card.character)\n\(card.suit.symbol)")
 									.font(.system(size: 15).monospaced())
 									.padding(3)
 							}
-							.background(Color.white)
+							.background(.white)
 							.cornerRadius(3)
 							.foregroundColor(card.suit.color)
 						}
 					}
+					else {
+						// Only show one card
+						if dealer.count > 0 {
+							VStack {
+								Text("\(dealer[0].character)\n\(dealer[0].suit.symbol)")
+									.font(.system(size: 15).monospaced())
+									.padding(3)
+							}
+							.background(.white)
+							.cornerRadius(3)
+							.foregroundColor(dealer[0].suit.color)
+							VStack {
+								Text("? \n ")
+									.font(.system(size: 15).monospaced())
+									.padding(3)
+							}
+							.background(.gray)
+							.cornerRadius(3)
+							.foregroundColor(.black)
+						}
+					}
 				}
-				.frame(maxHeight: .infinity, alignment: .bottom)
-				ZStack {
+			}
+			ZStack {
+				if staying {
 					switch outcome {
 						case 1: Text("Winner!").fontWeight(.bold).foregroundColor(.green)
 						case 2: Text("Push!").fontWeight(.bold).foregroundColor(.blue)
 						default: Text("Loser!").fontWeight(.bold).foregroundColor(.red)
 					}
 				}
+				else { Text("Your Turn").italic() }
 			}
 			VStack {
 				HStack {
@@ -142,19 +166,16 @@ struct ContentView: View {
 								.font(.system(size: 15).monospaced())
 								.padding(3)
 						}
-						.background(Color.white)
+						.background(.white)
 						.cornerRadius(3)
 						.foregroundColor(card.suit.color)
 					}
 				}
-				Text("Player")
 			}
-			.frame(maxHeight: .infinity, alignment: .top)
 			if !staying {
 				HStack {
 					// TODO: Offer split
 					Button("Hit") {
-						// TODO: Check if busted
 						hand.append(deck.popLast()!)
 						let playerPoints = Card.points(hand.map({$0.value}))
 						if playerPoints > 21 {
@@ -162,9 +183,17 @@ struct ContentView: View {
 							staying = true
 						}
 					}
-					Button("Stay") {
+					Button("\(label)") {
 						outcome = getOutcome()
 						staying = true
+					}
+				}
+				.frame(maxHeight: .infinity, alignment: .bottom)
+			}
+			else {
+				HStack {
+					Button("Play Again") {
+						reset()
 					}
 				}
 				.frame(maxHeight: .infinity, alignment: .bottom)
