@@ -4,77 +4,6 @@
 
 import SwiftUI
 
-enum Suit {
-	case club, diamond, heart, spade
-	var color: Color {
-		switch (self) {
-			case .diamond: return .red
-			case .heart: return .red
-			default: return .black
-		}
-	}
-	var symbol: String {
-		switch (self) {
-			case .club: return "♣"
-			case .diamond: return "♦"
-			case .heart: return "♥"
-			case .spade: return "♠"
-		}
-	}
-}
-
-class Card {
-	let id = UUID()
-	var suit: Suit
-	var value: Int
-	var character: String {
-		switch (value) {
-			case 1: return "A "
-			case 10: return "10"
-			case 11: return "J "
-			case 12: return "Q "
-			case 13: return "K "
-			default: return "\(value) "
-		}
-	}
-	init(_ suit: Suit, _ value: Int) {
-		self.suit = suit
-		self.value = value
-	}
-	static func points(_ cards: [Int]) -> Int {
-		var aces = 0
-		var points = 0
-		for card in cards {
-			// Add points counting aces as 11 by default
-			if card == 1 { aces += 1; points += 11; }
-			else if (card > 10) { points += 10 }
-			else { points += card }
-			// If points has exceeded 21 and player has aces, reduce to 1
-			while points > 21 {
-				if aces > 0 {
-					aces -= 1
-					points -= 10
-				}
-				else { break }
-			}
-		}
-		return points
-	}
-	static func deck() -> [Card] {
-		var cards: [Card] = []
-		for i in 1...52 {
-			var s = Suit.club
-			if (i > 13 && i < 27) { s = Suit.diamond }
-			else if (i > 26 && i < 40) { s = Suit.heart }
-			else if (i > 39) { s = Suit.spade }
-			let c = Card(s, i%13+1)
-			cards.append(c)
-		}
-		cards.shuffle()
-		return cards
-	}
-}
-
 struct ContentView: View {
 	@State var dealer: [Card] = []
 	@State var hand: [Card] = []
@@ -131,7 +60,6 @@ struct ContentView: View {
 						}
 					}
 					else {
-						// Only show one card
 						if dealer.count > 0 {
 							VStack {
 								Text("\(dealer[0].character)\n\(dealer[0].suit.symbol)")
@@ -209,5 +137,74 @@ struct ContentView: View {
 		.onTapGesture {
 			if staying { reset() }
 		}
+	}
+}
+
+enum Suit {
+	case club, diamond, heart, spade
+	var color: Color {
+		switch (self) {
+			case .diamond: return .red
+			case .heart: return .red
+			default: return .black
+		}
+	}
+	var symbol: String {
+		switch (self) {
+			case .club: return "♣"
+			case .diamond: return "♦"
+			case .heart: return "♥"
+			case .spade: return "♠"
+		}
+	}
+}
+
+class Card {
+	let id = UUID()
+	var suit: Suit
+	var value: Int
+	var character: String {
+		switch (value) {
+			case 1: return "A "
+			case 10: return "10"
+			case 11: return "J "
+			case 12: return "Q "
+			case 13: return "K "
+			default: return "\(value) "
+		}
+	}
+	init(_ suit: Suit, _ value: Int) {
+		self.suit = suit
+		self.value = value
+	}
+	static func points(_ cards: [Int]) -> Int {
+		var aces = 0
+		var points = 0
+		for card in cards {
+			if card == 1 { aces += 1; points += 11; }
+			else if (card > 10) { points += 10 }
+			else { points += card }
+			while points > 21 {
+				if aces > 0 {
+					aces -= 1
+					points -= 10
+				}
+				else { break }
+			}
+		}
+		return points
+	}
+	static func deck() -> [Card] {
+		var cards: [Card] = []
+		for i in 1...52 {
+			var s = Suit.club
+			if (i > 13 && i < 27) { s = Suit.diamond }
+			else if (i > 26 && i < 40) { s = Suit.heart }
+			else if (i > 39) { s = Suit.spade }
+			let c = Card(s, i%13+1)
+			cards.append(c)
+		}
+		cards.shuffle()
+		return cards
 	}
 }

@@ -8,7 +8,7 @@ import SwiftUI
 struct P21_Watch_AppApp: App {
 	var body: some Scene {
 		WindowGroup {
-			ContentView()//.ignoresSafeArea()
+			ContentView()
 		}
 	}
 }
