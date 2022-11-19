@@ -52,26 +52,18 @@ class Card {
 			cards.append(c)
 		}
 		cards.shuffle()
-		for card in cards {
-			print("\(card.suit.symbol)\(card.character)")
-		}
 		return cards
 	}
 }
-
-// Play order
-// Dealer deals two cards to self, then player
-//
 
 struct ContentView: View {
 	@State var dealer: [Card] = [Card(.diamond, 12), Card(.club, 1)]
 	@State var hand: [Card] = []
 	@State var deck = Card.deck()
-    var body: some View {
+	var body: some View {
 		VStack {
 			Text("Your Hand")
 			HStack {
-				// Show cards that have been drawn
 				ForEach(hand, id: \.id) { card in
 					VStack {
 						Text("\(card.character)\n\(card.suit.symbol)")
@@ -101,5 +93,5 @@ struct ContentView: View {
 			.frame(maxHeight: .infinity, alignment: .bottom)
 		}
 		.frame(maxHeight: .infinity, alignment: .top)
-    }
+	}
 }
