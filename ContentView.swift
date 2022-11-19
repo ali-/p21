@@ -29,13 +29,11 @@ struct ContentView: View {
 	func getOutcome() -> Int {
 		var dealerPoints = Card.points(dealer.map({$0.value}))
 		let playerPoints = Card.points(hand.map({$0.value}))
-		
 		while dealerPoints < 17 {
 			dealer.append(deck.popLast()!)
 			dealerPoints = Card.points(dealer.map({$0.value}))
 		}
-		
-		if playerPoints == dealerPoints { return 2 }
+		if playerPoints == dealerPoints && playerPoints <= 21 { return 2 }
 		else if playerPoints == 21 && dealerPoints != 21 { return 1 }
 		else if playerPoints > dealerPoints && playerPoints < 21 { return 1 }
 		else if dealerPoints > 21 && playerPoints <= 21 { return 1 }
@@ -124,19 +122,12 @@ struct ContentView: View {
 				.frame(maxHeight: .infinity, alignment: .bottom)
 			}
 			else {
-				HStack {
-					Button("Play Again") {
-						reset()
-					}
-				}
-				.frame(maxHeight: .infinity, alignment: .bottom)
+				Button("Play Again") { reset() }.frame(maxHeight: .infinity, alignment: .bottom)
 			}
 		}
 		.frame(maxHeight: .infinity, alignment: .top)
 		.onAppear(perform: initialize)
-		.onTapGesture {
-			if staying { reset() }
-		}
+		.onTapGesture { if staying { reset() } }
 	}
 }
 
