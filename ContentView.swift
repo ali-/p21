@@ -41,6 +41,25 @@ class Card {
 		self.suit = suit
 		self.value = value
 	}
+	static func points(_ cards: [Int]) -> Int {
+		var aces = 0
+		var points = 0
+		for card in cards {
+			// Add points counting aces as 11 by default
+			if card == 1 { aces += 1; points += 11; }
+			else if (card > 10) { points += 10 }
+			else { points += card }
+			// If points has exceeded 21 and player has aces, reduce to 1
+			while points > 21 {
+				if aces > 0 {
+					aces -= 1
+					points -= 10
+				}
+				else { break }
+			}
+		}
+		return points
+	}
 	static func deck() -> [Card] {
 		var cards: [Card] = []
 		for i in 1...52 {
@@ -57,41 +76,104 @@ class Card {
 }
 
 struct ContentView: View {
-	@State var dealer: [Card] = [Card(.diamond, 12), Card(.club, 1)]
+	@State var dealer: [Card] = []
 	@State var hand: [Card] = []
 	@State var deck = Card.deck()
+	@State var outcome = 0
+	@State var staying = false
+	
+	func initialize() {
+		dealer.append(deck.popLast()!)
+		dealer.append(deck.popLast()!)
+		hand.append(deck.popLast()!)
+		hand.append(deck.popLast()!)
+	}
+	
+	func reset() {
+		dealer = []
+		hand = []
+		deck = Card.deck()
+		staying = false
+		initialize()
+	}
+	
+	func getOutcome() -> Int {
+		let dealerPoints = Card.points(dealer.map({$0.value}))
+		let playerPoints = Card.points(hand.map({$0.value}))
+		if playerPoints == dealerPoints { return 2 }
+		else if playerPoints == 21 && dealerPoints != 21 { return 1 }
+		else if playerPoints > dealerPoints && playerPoints < 21 { return 1 }
+		else if playerPoints > 21 { return 0 }
+		return 0
+	}
+	
 	var body: some View {
 		VStack {
-			Text("Your Hand")
-			HStack {
-				ForEach(hand, id: \.id) { card in
-					VStack {
-						Text("\(card.character)\n\(card.suit.symbol)")
-							.font(.system(size: 15).monospaced())
-							.padding(3)
+			if staying {
+				VStack {
+					Text("Dealer")
+					HStack {
+						ForEach(dealer, id: \.id) { card in
+							VStack {
+								Text("\(card.character)\n\(card.suit.symbol)")
+									.font(.system(size: 15).monospaced())
+									.padding(3)
+							}
+							.background(Color.white)
+							.cornerRadius(3)
+							.foregroundColor(card.suit.color)
+						}
 					}
-					.background(Color.white)
-					.cornerRadius(3)
-					.foregroundColor(card.suit.color)
 				}
+				.frame(maxHeight: .infinity, alignment: .bottom)
+				ZStack {
+					switch outcome {
+						case 1: Text("Winner!").fontWeight(.bold).foregroundColor(.green)
+						case 2: Text("Push!").fontWeight(.bold).foregroundColor(.blue)
+						default: Text("Loser!").fontWeight(.bold).foregroundColor(.red)
+					}
+				}
+			}
+			VStack {
+				HStack {
+					ForEach(hand, id: \.id) { card in
+						VStack {
+							Text("\(card.character)\n\(card.suit.symbol)")
+								.font(.system(size: 15).monospaced())
+								.padding(3)
+						}
+						.background(Color.white)
+						.cornerRadius(3)
+						.foregroundColor(card.suit.color)
+					}
+				}
+				Text("Player")
 			}
 			.frame(maxHeight: .infinity, alignment: .top)
-			.padding()
-			HStack {
-				// TODO: Offer split if pair
-				Button("Hit") {
-					hand.append(deck.popLast()!)
-					let card = hand[hand.count-1]
-					print("Player drew \(card.suit.symbol)\(card.character)")
+			if !staying {
+				HStack {
+					// TODO: Offer split
+					Button("Hit") {
+						// TODO: Check if busted
+						hand.append(deck.popLast()!)
+						let playerPoints = Card.points(hand.map({$0.value}))
+						if playerPoints > 21 {
+							outcome = getOutcome()
+							staying = true
+						}
+					}
+					Button("Stay") {
+						outcome = getOutcome()
+						staying = true
+					}
 				}
-				Button("Stay") {
-					print("Draw dealer cards")
-					// Hide buttons
-					// Draw dealer cards
-				}
+				.frame(maxHeight: .infinity, alignment: .bottom)
 			}
-			.frame(maxHeight: .infinity, alignment: .bottom)
 		}
 		.frame(maxHeight: .infinity, alignment: .top)
+		.onAppear(perform: initialize)
+		.onTapGesture {
+			if staying { reset() }
+		}
 	}
 }
