@@ -109,6 +109,7 @@ struct ContentView: View {
 		if playerPoints == dealerPoints { return 2 }
 		else if playerPoints == 21 && dealerPoints != 21 { return 1 }
 		else if playerPoints > dealerPoints && playerPoints < 21 { return 1 }
+		else if dealerPoints > 21 && playerPoints <= 21 { return 1 }
 		else if playerPoints > 21 { return 0 }
 		return 0
 	}
