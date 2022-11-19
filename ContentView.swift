@@ -81,7 +81,6 @@ struct ContentView: View {
 	@State var deck = Card.deck()
 	@State var outcome = 0
 	@State var staying = false
-	@State var label = "Stay"
 	
 	func initialize() {
 		dealer.append(deck.popLast()!)
@@ -95,13 +94,18 @@ struct ContentView: View {
 		hand = []
 		deck = Card.deck()
 		staying = false
-		label = "Stay"
 		initialize()
 	}
 	
 	func getOutcome() -> Int {
-		let dealerPoints = Card.points(dealer.map({$0.value}))
+		var dealerPoints = Card.points(dealer.map({$0.value}))
 		let playerPoints = Card.points(hand.map({$0.value}))
+		
+		while dealerPoints < 17 {
+			dealer.append(deck.popLast()!)
+			dealerPoints = Card.points(dealer.map({$0.value}))
+		}
+		
 		if playerPoints == dealerPoints { return 2 }
 		else if playerPoints == 21 && dealerPoints != 21 { return 1 }
 		else if playerPoints > dealerPoints && playerPoints < 21 { return 1 }
@@ -183,7 +187,7 @@ struct ContentView: View {
 							staying = true
 						}
 					}
-					Button("\(label)") {
+					Button("Stay") {
 						outcome = getOutcome()
 						staying = true
 					}
