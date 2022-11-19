@@ -34,10 +34,11 @@ struct ContentView: View {
 			dealerPoints = Card.points(dealer.map({$0.value}))
 		}
 		if playerPoints == dealerPoints && playerPoints <= 21 { return 2 }
-		else if playerPoints == 21 && dealerPoints != 21 { return 1 }
-		else if playerPoints > dealerPoints && playerPoints < 21 { return 1 }
-		else if dealerPoints > 21 && playerPoints <= 21 { return 1 }
-		else if playerPoints > 21 { return 0 }
+		else if (playerPoints == 21 && dealerPoints != 21) ||
+				(playerPoints > dealerPoints && playerPoints < 21) ||
+				(dealerPoints > 21 && playerPoints <= 21) {
+			return 1
+		}
 		return 0
 	}
 	
